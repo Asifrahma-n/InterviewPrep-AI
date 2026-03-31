@@ -1,0 +1,4 @@
+﻿components/FormField.tsx(26,19): error TS2304: Cannot find name 'T'.
+components/WebcamAnalyzer.tsx(122,28): error TS7006: Parameter 'a' implicitly has an 'any' type.
+components/WebcamAnalyzer.tsx(122,31): error TS7006: Parameter 'b' implicitly has an 'any' type.
+lib/actions/general.action.ts(86,55): error TS2783: 'id' is specified more than once, so this usage will be overwritten.

@@ -3,6 +3,7 @@
 import { db, auth } from "@/firebase/admin";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 const ONE_WEEK = 60 * 60 * 24 * 7; // 7 days
 
@@ -89,7 +90,7 @@ export async function setSessionCookie(idToken: string) {
   });
 }
 
-export async function getCurrentUser(): Promise<User | null> {
+const getCurrentUserUncached = async (): Promise<User | null> => {
   const cookieStore = await cookies();
   const sessionCookie = cookieStore.get("session")?.value;
 
@@ -113,7 +114,9 @@ export async function getCurrentUser(): Promise<User | null> {
     console.log(e);
     return null;
   }
-}
+};
+
+export const getCurrentUser = cache(getCurrentUserUncached);
 
 export async function isAuthenticated() {
   const user = await getCurrentUser();

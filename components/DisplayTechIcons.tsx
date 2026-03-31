@@ -1,9 +1,41 @@
+"use client";
+
 import { cn, getTechLogos } from "@/lib/utils";
 import Image from "next/image";
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const DisplayTechIcons = async ({ techStack }: TechIconProps) => {
-  const techIcons = await getTechLogos(techStack);
+const DisplayTechIcons = ({ techStack }: { techStack: string[] }) => {
+  const [mounted, setMounted] = useState(false);
+  const [techIcons, setTechIcons] = useState<{ tech: string; url: string }[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+    const fetchIcons = async () => {
+      const icons = await getTechLogos(techStack);
+      setTechIcons(icons);
+    };
+    fetchIcons();
+  }, [techStack]);
+
+  if (!mounted) {
+    return (
+      <div className="flex flex-row gap-1" aria-hidden>
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="size-9 animate-pulse rounded-full bg-dark-300"
+          />
+        ))}
+      </div>
+    );
+  }
+
+  if (techIcons.length === 0) {
+    return (
+      <span className="text-sm text-muted-foreground">—</span>
+    );
+  }
+
   return (
     <div className="flex flex-row">
       {techIcons.slice(0, 3).map(({ tech, url }, index) => (

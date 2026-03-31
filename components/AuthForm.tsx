@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -28,7 +29,12 @@ const authFormSchema = (type: FormType) => {
 
 const AuthForm = ({ type }: { type: FormType }) => {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const formSchema = authFormSchema(type);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,12 +92,13 @@ const AuthForm = ({ type }: { type: FormType }) => {
         toast.success("Signed in successfully.");
         router.push("/");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Comment this out if you don’t want it logged
       // console.error("Sign-in error:", error);
 
-      if (error.code) {
-        switch (error.code) {
+      const err = error as { code?: string };
+      if (err?.code) {
+        switch (err.code) {
           case "auth/invalid-email":
             toast.error("Invalid email format. Please try again.");
             break;
@@ -114,10 +121,15 @@ const AuthForm = ({ type }: { type: FormType }) => {
             toast.error("Something went wrong. Please try again later.");
         }
       } else {
-        // Handle non-Firebase errors (like your server-side action failing)
         toast.error("Unexpected error occurred. Please try again.");
       }
     }
+  }
+
+  function handleSubmitWrapper(e: React.BaseSyntheticEvent) {
+    form.handleSubmit(onSubmit)(e).catch(() => {
+      toast.error("Something went wrong. Please try again.");
+    });
   }
 
   const isSignIn = type === "sign-in";
@@ -131,40 +143,60 @@ const AuthForm = ({ type }: { type: FormType }) => {
         </div>
 
         <h3>Practice job interview with AI</h3>
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full space-y-6 mt-4 form"
-          >
+        {!mounted ? (
+          <div className="w-full space-y-6 mt-4 form" aria-hidden="true">
             {!isSignIn && (
+              <div className="space-y-2">
+                <div className="label h-4 w-16 bg-muted rounded animate-pulse" />
+                <div className="input h-9 bg-muted rounded animate-pulse" />
+              </div>
+            )}
+            <div className="space-y-2">
+              <div className="label h-4 w-24 bg-muted rounded animate-pulse" />
+              <div className="input h-9 bg-muted rounded animate-pulse" />
+            </div>
+            <div className="space-y-2">
+              <div className="label h-4 w-20 bg-muted rounded animate-pulse" />
+              <div className="input h-9 bg-muted rounded animate-pulse" />
+            </div>
+            <div className="btn h-9 w-full bg-muted rounded animate-pulse" />
+          </div>
+        ) : (
+          <Form {...form}>
+            <form
+              onSubmit={handleSubmitWrapper}
+              className="w-full space-y-6 mt-4 form"
+            >
+              {!isSignIn && (
+                <FormField
+                  control={form.control}
+                  name="name"
+                  label="Name"
+                  placeholder="Your name"
+                />
+              )}
               <FormField
                 control={form.control}
-                name="name"
-                label="Name"
-                placeholder="Your name"
+                name="email"
+                label="Email"
+                placeholder="Your email address"
+                type="email"
               />
-            )}
-            <FormField
-              control={form.control}
-              name="email"
-              label="Email"
-              placeholder="Your email address"
-              type="email"
-            />
 
-            <FormField
-              control={form.control}
-              name="password"
-              label="Password"
-              placeholder="Enter your password"
-              type="password"
-            />
+              <FormField
+                control={form.control}
+                name="password"
+                label="Password"
+                placeholder="Enter your password"
+                type="password"
+              />
 
-            <Button className="btn" type="submit">
-              {isSignIn ? "Sign in" : "Create an Account"}
-            </Button>
-          </form>
-        </Form>
+              <Button className="btn" type="submit">
+                {isSignIn ? "Sign in" : "Create an Account"}
+              </Button>
+            </form>
+          </Form>
+        )}
 
         <p className="text-center">
           {isSignIn ? "Don't have an account? " : "Already have an account? "}

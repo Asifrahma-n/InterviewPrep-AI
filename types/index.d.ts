@@ -1,3 +1,9 @@
+interface QuestionFeedbackItem {
+  question: string;
+  score: number;
+  comment: string;
+}
+
 interface Feedback {
   id: string;
   interviewId: string;
@@ -10,6 +16,9 @@ interface Feedback {
   strengths: string[];
   areasForImprovement: string[];
   finalAssessment: string;
+  BodyLanguageAndConfidence?: number;
+  questionFeedback?: QuestionFeedbackItem[];
+  durationSeconds?: number;
   createdAt: string;
 }
 
@@ -25,10 +34,19 @@ interface Interview {
   finalized: boolean;
 }
 
+interface AveragedVisualMetrics {
+  averageConfidence: number;
+  averageAttention: number;
+  dominantEmotion: string;
+}
+
 interface CreateFeedbackParams {
   interviewId: string;
   userId: string;
   transcript: { role: string; content: string }[];
+  questions?: string[];
+  visualMetrics?: AveragedVisualMetrics;
+  durationSeconds?: number;
   feedbackId?: string;
 }
 
@@ -39,12 +57,14 @@ interface User {
 }
 
 interface InterviewCardProps {
-  interviewId?: string;
+  id?: string;
   userId?: string;
+  currentUserId?: string;
   role: string;
   type: string;
   techstack: string[];
   createdAt?: string;
+  feedback?: Feedback | null;
 }
 
 interface AgentProps {
